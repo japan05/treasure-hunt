@@ -15,13 +15,17 @@
 :- discontiguous print_full_map/0.
 :- dynamic found_gold/2.
 :- dynamic grid_size/1.
+:- dynamic score/1.
+
 % -----------------------------
 % Run the world
 % -----------------------------
-run(Steps) :-
+run(Steps,Score) :-
     clean_world,
     init_world,
-    main_loop_steps([], Steps).
+    init_score,
+    main_loop_steps([], Steps),
+    score(Score).
 grid_size(6).
 % -----------------------------
 % Cleanup world
@@ -46,8 +50,8 @@ clean_world :-
 % Initialize world with random hazards
 % -----------------------------
 init_world :-
-
-    clean_world,  % just in case
+    assert(score(0)),
+    clean_world,  
     grid_size(X),
     GridSize = X,
     write(GridSize),
@@ -188,7 +192,7 @@ main_loop_steps(Acc, Steps) :-
                 % After shooting, check for safe moves again
                 next_safe_move(NX2, NY2),
                 ( NX2 = none -> Steps = NewAcc
-                    ; retractall(agent(_, _)), assert(agent(NX2,NY2)),
+                    ; retractall(agent(_, _)), assert(agent(NX2,NY2)),update_score(-1), 
                     main_loop_steps(NewAcc, Steps)
                 )
                 ; Steps = NewAcc
@@ -242,7 +246,9 @@ infer_safe_neighbors(X,Y) :-
         (\+ visited(NX,NY), \+ safe(NX,NY) -> assertz(safe(NX,NY)), format('Inferred safe: (~w,~w)~n',[NX,NY]) ; true)).
 
 assert_found_gold(X,Y) :-
-    (found_gold(X,Y) -> true ; assertz(found_gold(X,Y)), format('Found Gold at (~w,~w)!~n',[X,Y])).
+    (found_gold(X,Y) -> true ; assertz(found_gold(X,Y)),
+    update_score(1000),      % Getting gold gives 1000 points 
+    format('Found Gold at (~w,~w)!~n',[X,Y])).
 
 infer_possible_pit(X,Y) :-
     neighbors(X,Y,Ns),
@@ -388,7 +394,7 @@ shoot_wumpus(WX,WY) :-
     format(' Shooting Wumpus at (~w,~w)!~n', [WX, WY]),
     retract(found_wumpus(WX,WY)),
     assertz(wumpus_dead(WX,WY)),
-
+    update_score(-10),        % Shooting arrow costs 10 points
     % Remove stench from all cells adjacent to Wumpus
     neighbors(WX,WY,Adj),
     forall(member((AX,AY),Adj),
@@ -420,3 +426,14 @@ determined_cell(X,Y,'W') :- found_wumpus(X,Y), \+ visited(X,Y), \+ agent(X,Y).
 determined_cell(X,Y,'P') :- found_pit(X,Y), \+ visited(X,Y), \+ agent(X,Y).
 determined_cell(X,Y,'G') :- found_gold(X,Y).
 determined_cell(X,Y,'v') :- visited(X,Y), \+ agent(X,Y), \+ found_gold(X,Y), \+ found_pit(X,Y), \+ found_wumpus(X,Y), \+ safe(X,Y).
+
+
+update_score(Delta) :-
+    retract(score(S)),
+    S1 is S + Delta,
+    assert(score(S1)),
+    format('Current Score: ~w~n', [S1]).
+
+init_score :-
+    retractall(score(_)),
+    assertz(score(0)).
