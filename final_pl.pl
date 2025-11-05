@@ -235,7 +235,6 @@ infer_from_percepts(X, Y, Percepts) :-
     (Percepts = [] -> infer_safe_neighbors(X,Y) ; true),
     (member(stench, Percepts) -> infer_possible_wumpus(X,Y) ; true),
     (member(breeze, Percepts) -> infer_possible_pit(X,Y) ; true),
-    (member(glitter, Percepts) -> assert_found_gold(X,Y) ; true),
     infer_safe_by_contradiction,
     cross_infer_wumpus,
     cross_infer_pit.
@@ -394,6 +393,7 @@ shoot_wumpus(WX,WY) :-
     format(' Shooting Wumpus at (~w,~w)!~n', [WX, WY]),
     retract(found_wumpus(WX,WY)),
     assertz(wumpus_dead(WX,WY)),
+    assertz(safe(WX,WY)),
     update_score(-10),        % Shooting arrow costs 10 points
     % Remove stench from all cells adjacent to Wumpus
     neighbors(WX,WY,Adj),
