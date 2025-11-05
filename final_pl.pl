@@ -379,14 +379,6 @@ next_safe_move(NX,NY) :-
 next_safe_move(none, none).
 
 
-% build_step(-Step)
-% Step = [[X,Y,CellValue], ...] for all determined cells (safe, visited, possible)
-build_step(Step) :-
-    findall([X,Y,Val],
-        (   determined_cell(X,Y,Val)
-        ),
-        Step).
-
 
 
 shoot_wumpus(WX,WY) :-
@@ -406,11 +398,22 @@ shoot_wumpus(WX,WY) :-
     ).
 
 
+% Build a step with percepts included
+build_step(Step) :-
+    findall([X,Y,Val,Percepts],
+        (   determined_cell(X,Y,Val),
+            cell_percepts(X,Y,Percepts)
+        ),
+        Step).
+
+% Get percepts at a cell (if none, return empty list)
+cell_percepts(X,Y,Percepts) :-
+    ( percept_at(X,Y,Ps) -> Percepts = Ps ; Percepts = [] ).
+
 % Determine cell value
 determined_cell(X,Y,'A') :- agent(X,Y).       % Current agent
-determined_cell(X,Y,'v') :- visited(X,Y), \+ agent(X,Y).  % Visited, but not current agent
 determined_cell(X,Y,'.') :- safe(X,Y), \+ visited(X,Y), \+ agent(X,Y).
-determined_cell(X,Y,'P?') :- possible_pit(X,Y), \+ visited(X,Y), \+ agent(X,Y).
-determined_cell(X,Y,'W?') :- possible_wumpus(X,Y), \+ visited(X,Y), \+ agent(X,Y).
+determined_cell(X,Y,'W') :- found_wumpus(X,Y), \+ visited(X,Y), \+ agent(X,Y).
+determined_cell(X,Y,'P') :- found_pit(X,Y), \+ visited(X,Y), \+ agent(X,Y).
 determined_cell(X,Y,'G') :- found_gold(X,Y).
-
+determined_cell(X,Y,'v') :- visited(X,Y), \+ agent(X,Y), \+ found_gold(X,Y), \+ found_pit(X,Y), \+ found_wumpus(X,Y), \+ safe(X,Y).
