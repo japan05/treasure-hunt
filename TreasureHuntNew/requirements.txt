@@ -1,0 +1,17 @@
+# Wumpus World GUI Requirements
+
+# Core requirements (usually included with Python)
+# tkinter - GUI framework (included with Python)
+
+# Optional but recommended
+Pillow>=8.0.0    # For better image handling (PNG, JPEG support)
+
+# System requirements (not Python packages):
+# - SWI-Prolog: Download from https://www.swi-prolog.org/Download.html
+#   Make sure 'swipl' command is available in your system PATH
+
+# Installation instructions:
+# 1. Install Pillow: pip install pillow
+# 2. Install SWI-Prolog from the official website
+# 3. Ensure SWI-Prolog is in your system PATH
+# 4. Run: python demo.py
