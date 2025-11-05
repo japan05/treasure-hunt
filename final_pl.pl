@@ -14,6 +14,7 @@
 :- dynamic found_pit/2.
 :- discontiguous print_full_map/0.
 :- dynamic found_gold/2.
+:- dynamic grid_size/1.
 % -----------------------------
 % Run the world
 % -----------------------------
@@ -21,7 +22,7 @@ run(Steps) :-
     clean_world,
     init_world,
     main_loop_steps([], Steps).
-
+grid_size(6).
 % -----------------------------
 % Cleanup world
 % -----------------------------
@@ -45,9 +46,11 @@ clean_world :-
 % Initialize world with random hazards
 % -----------------------------
 init_world :-
-    clean_world,  % just in case
-    GridSize = 4,
 
+    clean_world,  % just in case
+    grid_size(X),
+    GridSize = X,
+    write(GridSize),
     % Place 1 Wumpus randomly
     random_between(1, GridSize, WX),
     random_between(1, GridSize, WY),
