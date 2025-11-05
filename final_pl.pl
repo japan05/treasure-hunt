@@ -170,7 +170,7 @@ main_loop_steps(Acc, Steps) :-
         assert_found_gold(X,Y),
         format('Gold found at (~w,~w)! Exploration ends.~n', [X,Y]),
         % Remove all stench knowledge after gold is found
-        retractall(percept_at(_,_,Ps)),  % clear old percepts
+        retractall(percept_at(_,_,_)),  % clear old percepts
         forall((percept_at(A,B,OldPs), member(stench,OldPs)),
                (select(stench, OldPs, NewPs),
                 retract(percept_at(A,B,OldPs)),
